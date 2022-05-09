@@ -107,7 +107,7 @@ var convertIncidentToTicket = function(incident) {
         ID: incident['Incident Number'],
         Submitter: incident.Submitter,
         Status: incident.Status,
-        Description: incident.Description,
+        Summary: incident.Description,
         Source: incident['Reported Source'],
         Impact: incident.Impact,
         Urgency: incident.Urgency,
@@ -117,7 +117,8 @@ var convertIncidentToTicket = function(incident) {
         Priority: incident.Priority,
         ServiceType: incident.Service_Type,
         ModifiedDate: incident['Modified Date'],
-        Incident: incident['Entry ID']
+        Incident: incident['Entry ID'],
+        Notes: incident['Detailed Decription']
     };
 };
 
@@ -127,12 +128,13 @@ var convertWorkOrderToTicket = function(incident) {
         ID: incident['Work Order ID'],
         Submitter: incident.Submitter,
         Status: incident.Status,
-        Description: incident['Detailed Description'],
-        Summary: incident.Summary,
+        Notes: incident['Detailed Description'],
+        Summary: incident.Description,
         Assignee: incident['Request Assignee'],
         Email: incident['Customer Internet E-mail'],
         ModifiedDate: incident['Last Modified Date'],
-        WorkOrder: incident['Request ID']
+        WorkOrder: incident['Request ID'],
+        WOI: incident['WorkOrderID']
     };
 };
 
@@ -143,6 +145,7 @@ var convertTaskToTicket = function(incident) {
         Submitter: incident.Submitter,
         Status: incident.Status,
         Summary: incident.Summary,
+        Notes: incident.Notes,
         Name: incident.TaskName,
         Impact: incident.Impact,
         RootRequestID: incident.RootRequestID,
@@ -219,11 +222,14 @@ var getAssociatedPERWO = function(id, title) {
 
     var context = {
         'PER': {
-            RelatedID: incidentOne['Request ID01'],
+            'RelatedID': incidentOne['Request ID01'],
         }
     };
     return {
-        EntryContext: context
+        Type:entryTypes.note,
+        Contents:context,
+        ContentsType:formats.json,
+        EntryContext:context
     };
 };
 
@@ -281,7 +287,7 @@ var getPER = function(id, title) {
     filterEmptyFields(incident);
 
     var context = {
-        'Ticket(val.ID && val.ID == obj.ID)': convertPERToTicket(incident)
+        'Policy Exception Request(val.ID && val.ID == obj.ID)': convertPERToTicket(incident)
     };
     return createTableEntry(title || "Incident:",incident, context);
 };
@@ -589,6 +595,7 @@ switch (command) {
             {
                 Notes: args.notes,
                 Status: args.status,
+                StatusReasonSelection: args.statusReason,
                 Priority: args.priority,
                 'Assignee Company': "ADT Security",
                 'Assignee Organization': "Security",
